@@ -6,13 +6,17 @@ from nexus.ui.editor import StoryEditor
 from nexus.ui.module_view import ModuleManager
 from nexus.ui.ai_panel import AIPanel
 from nexus.ui.wiki import LoreWiki
+from nexus.ui.plot_planner import PlotPlanner
+from nexus.ui.timeline import TimelineView
+from fpdf import FPDF
+from nexus.ui.snapshots import SnapshotManager
 import os
 
 class MainWindow(tk.Tk):
-    """Main Application Window for Nexus God Writer."""
+    """The Ultimate Application Window for Nexus God Writer."""
     def __init__(self):
         super().__init__()
-        self.title("NEXUS GOD WRITER - Advanced Worldbuilding & Story Engine")
+        self.title("NEXUS GOD WRITER - The Ultimate Worldbuilding & Story Engine")
         self.geometry("1400x900")
         self.configure(bg="#0a0a0a")
         
@@ -43,6 +47,8 @@ class MainWindow(tk.Tk):
         nav_items = [
             ("🌍 World Wizard", self.show_world_config),
             ("📖 Story Editor", self.show_editor),
+            ("🗺️ Plot Planner", self.show_plot_planner),
+            ("📜 Timeline", self.show_timeline),
             ("📚 Lore Wiki", self.show_lore_wiki),
             ("🤖 AI Assistant", self.show_ai_panel),
         ]
@@ -54,7 +60,9 @@ class MainWindow(tk.Tk):
                 nav_items.append((label, lambda m=mod: self.show_module_manager(m)))
 
         nav_items.append(("", None)) # Spacer
-        nav_items.append(("📤 Export Project", self.export_project))
+        nav_items.append(("📸 Snapshots", self.show_snapshots))
+        nav_items.append(("📤 Export Markdown", self.export_project))
+        nav_items.append(("📄 Export PDF", self.export_pdf))
         nav_items.append(("🏠 Home", self.show_welcome))
 
         for text, cmd in nav_items:
@@ -164,7 +172,7 @@ class MainWindow(tk.Tk):
 
     def show_editor(self):
         self.clear_content()
-        StoryEditor(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
+        StoryEditor(self.content, self.engine, self.ai).pack(fill=tk.BOTH, expand=True)
 
     def show_module_manager(self, mod_name):
         self.clear_content()
@@ -177,6 +185,18 @@ class MainWindow(tk.Tk):
     def show_lore_wiki(self):
         self.clear_content()
         LoreWiki(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
+
+    def show_plot_planner(self):
+        self.clear_content()
+        PlotPlanner(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
+
+    def show_timeline(self):
+        self.clear_content()
+        TimelineView(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
+
+    def show_snapshots(self):
+        self.clear_content()
+        SnapshotManager(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def export_project(self):
         if not self.engine.current_id: return
@@ -194,4 +214,26 @@ class MainWindow(tk.Tk):
                         f.write(f"### {cfile.replace('.txt', '')}\n")
                         with open(os.path.join(story_dir, cfile), "r", encoding="utf-8") as cf:
                             f.write(cf.read() + "\n\n")
-            messagebox.showinfo("Nexus", "Export Complete.")
+    def export_pdf(self):
+        if not self.engine.current_id: return
+        file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF", "*.pdf")])
+        if file_path:
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            
+            pdf.cell(200, 10, txt=self.engine.config['project_name'], ln=True, align='C')
+            pdf.ln(10)
+            
+            story_dir = os.path.join(self.engine.get_dir(), "story")
+            for cfile in sorted(os.listdir(story_dir)):
+                if cfile.endswith(".txt"):
+                    pdf.set_font("Arial", 'B', 14)
+                    pdf.cell(200, 10, txt=cfile.replace('.txt', ''), ln=True)
+                    pdf.set_font("Arial", size=12)
+                    with open(os.path.join(story_dir, cfile), "r", encoding="utf-8") as cf:
+                        pdf.multi_cell(0, 10, txt=cf.read())
+                    pdf.ln(10)
+            
+            pdf.output(file_path)
+            messagebox.showinfo("Nexus", "PDF Export Complete.")

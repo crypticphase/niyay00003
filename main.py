@@ -10,5 +10,9 @@ if __name__ == "__main__":
     if not os.path.exists("projects"):
         os.makedirs("projects")
         
-    app = MainWindow()
-    app.mainloop()
+    # Start the Ultimate Nexus God Writer
+    try:
+        app = MainWindow()
+        app.mainloop()
+    except Exception as e:
+        print(f"Critical Error: {e}")

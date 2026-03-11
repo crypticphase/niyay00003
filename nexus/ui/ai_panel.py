@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import scrolledtext
 
 class AIPanel(tk.Frame):
-    """AI Interaction Panel for Gemini God Assistant."""
+    """The Ultimate AI Interaction Panel for Gemini God Assistant."""
     def __init__(self, parent, engine, ai):
         super().__init__(parent, bg="#0a0a0a")
         self.engine = engine

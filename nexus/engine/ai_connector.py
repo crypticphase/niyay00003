@@ -3,7 +3,7 @@ import google.generativeai as genai
 from typing import Dict, List, Any
 
 class AIConnector:
-    """Advanced AI Connector for Gemini with context-aware prompt engineering."""
+    """The Ultimate AI Connector for Nexus God Writer."""
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         if self.api_key:
@@ -35,6 +35,21 @@ class AIConnector:
         prompt = "Analyze the entire world lore and story for any contradictions, plot holes, or character inconsistencies. Provide a detailed report."
         return self.ask(prompt, context)
 
-    def generate_lore(self, mod_type: str, context: str):
-        prompt = f"Generate a detailed {mod_type} entry that fits perfectly into this world. Return in format: Name: [Name]\nDetails: [Details]"
+    def analyze_story_director(self, story_content: str, context: str):
+        prompt = f"""
+        Analyze the following story content for:
+        1. Conflict: Is it strong enough?
+        2. Pacing: Is it too fast or slow?
+        3. Tension: How is the emotional curve?
+        4. Character Arc: Are the characters developing?
+        5. Three-Act Structure: Where are we in the story?
+        
+        Story Content:
+        {story_content}
+        """
+        return self.ask(prompt, context)
+
+    def generate_lore(self, mod_type: str, schema: List[str], context: str):
+        schema_str = ", ".join(schema)
+        prompt = f"Generate a detailed {mod_type} entry that fits perfectly into this world. Return in format: {schema_str}"
         return self.ask(prompt, context)

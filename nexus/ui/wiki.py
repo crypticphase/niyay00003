@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import scrolledtext
 
 class LoreWiki(tk.Frame):
-    """Searchable Lore Wiki for all world-building entries."""
+    """The Ultimate Searchable Lore Wiki for all world-building entries."""
     def __init__(self, parent, engine):
         super().__init__(parent, bg="#0a0a0a")
         self.engine = engine
@@ -28,7 +28,18 @@ class LoreWiki(tk.Frame):
         self.wiki_area.delete("1.0", tk.END)
         for mod, items in self.engine.modules.items():
             for item in items:
-                if term in item["name"].lower() or term in item["details"].lower():
-                    self.wiki_area.insert(tk.END, f"[{mod.upper()}] {item['name']}\n", "header")
-                    self.wiki_area.insert(tk.END, f"{item['details']}\n\n")
+                # Search across all fields in item
+                match = False
+                for val in item.values():
+                    if term in str(val).lower():
+                        match = True
+                        break
+                
+                if match:
+                    self.wiki_area.insert(tk.END, f"[{mod.upper()}] {item.get('name', 'Unnamed')}\n", "header")
+                    for k, v in item.items():
+                        if k != "name":
+                            self.wiki_area.insert(tk.END, f"{k.upper()}: {v}\n")
+                    self.wiki_area.insert(tk.END, "\n")
+        
         self.wiki_area.tag_config("header", foreground="#00ff00", font=("Segoe UI", 12, "bold"))
