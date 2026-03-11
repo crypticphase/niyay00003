@@ -8,6 +8,7 @@ from nexus.ui.ai_panel import AIPanel
 from nexus.ui.wiki import LoreWiki
 from nexus.ui.plot_planner import PlotPlanner
 from nexus.ui.timeline import TimelineView
+from nexus.ui.calendar import CalendarView
 from fpdf import FPDF
 from nexus.ui.snapshots import SnapshotManager
 import os
@@ -23,8 +24,62 @@ class MainWindow(tk.Tk):
         self.engine = ProjectManager()
         self.ai = AIConnector()
         
+        self.bind("<Control-k>", lambda e: self.show_command_palette())
+        self.bind("<Control-K>", lambda e: self.show_command_palette())
+        
         self.setup_layout()
         self.show_welcome()
+
+    def show_command_palette(self):
+        win = tk.Toplevel(self)
+        win.title("Command Palette")
+        win.geometry("500x400")
+        win.configure(bg="#111", padx=10, pady=10)
+        win.transient(self)
+        win.grab_set()
+        
+        tk.Label(win, text="COMMAND PALETTE (ค้นหาหรือสั่งการ)", bg="#111", fg="#00ff00", font=("Segoe UI", 10, "bold")).pack(pady=5)
+        
+        search_ent = tk.Entry(win, font=("Segoe UI", 14), bg="#222", fg="white", borderwidth=0, insertbackground="white")
+        search_ent.pack(fill=tk.X, pady=10)
+        search_ent.focus_set()
+        
+        results_frame = tk.Frame(win, bg="#111")
+        results_frame.pack(fill=tk.BOTH, expand=True)
+        
+        def do_search(evt=None):
+            for w in results_frame.winfo_children(): w.destroy()
+            term = search_ent.get().lower()
+            if not term: return
+            
+            # Commands
+            commands = [
+                ("🌍 ไปที่: ตั้งค่าโลก", self.show_world_config),
+                ("📖 ไปที่: เขียนเนื้อเรื่อง", self.show_editor),
+                ("🤖 ไปที่: ผู้ช่วย AI", self.show_ai_panel),
+                ("📅 ไปที่: ปฏิทิน", self.show_calendar),
+                ("💾 บันทึกโปรเจกต์", self.engine.save),
+            ]
+            
+            for text, cmd in commands:
+                if term in text.lower():
+                    btn = tk.Button(results_frame, text=text, command=lambda c=cmd: [c(), win.destroy()], 
+                                    bg="#222", fg="#ccc", anchor="w", relief=tk.FLAT, pady=5)
+                    btn.pack(fill=tk.X, pady=1)
+
+            # Lore Entries
+            if self.engine.current_id:
+                for mod, items in self.engine.modules.items():
+                    for it in items:
+                        name = it.get("name", "Unnamed")
+                        if term in name.lower():
+                            btn = tk.Button(results_frame, text=f"📦 {mod.upper()}: {name}", 
+                                            command=lambda m=mod: [self.show_module_manager(m), win.destroy()],
+                                            bg="#1a1a1a", fg="#888", anchor="w", relief=tk.FLAT, pady=5)
+                            btn.pack(fill=tk.X, pady=1)
+
+        search_ent.bind("<KeyRelease>", do_search)
+        win.bind("<Escape>", lambda e: win.destroy())
 
     def setup_layout(self):
         # Sidebar
@@ -32,6 +87,9 @@ class MainWindow(tk.Tk):
         self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
         
         tk.Label(self.sidebar, text="NEXUS", font=("Impact", 28), bg="#111", fg="#00ff00").pack(pady=20)
+        
+        tk.Button(self.sidebar, text="🔍 COMMAND PALETTE (Ctrl+K)", command=self.show_command_palette, 
+                  bg="#222", fg="#00ff00", font=("Segoe UI", 8, "bold"), pady=5).pack(fill=tk.X, pady=10)
         
         self.nav_frame = tk.Frame(self.sidebar, bg="#111")
         self.nav_frame.pack(fill=tk.BOTH, expand=True)
@@ -49,6 +107,7 @@ class MainWindow(tk.Tk):
             ("📖 เขียนเนื้อเรื่อง", self.show_editor),
             ("🗺️ วางโครงเรื่อง", self.show_plot_planner),
             ("📜 เส้นเวลา", self.show_timeline),
+            ("📅 ปฏิทินโลก", self.show_calendar),
             ("📚 คลังข้อมูล Lore", self.show_lore_wiki),
             ("🤖 ผู้ช่วย AI", self.show_ai_panel),
         ]
@@ -226,6 +285,14 @@ class MainWindow(tk.Tk):
             return
         self.clear_content()
         TimelineView(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
+
+    def show_calendar(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
+        self.clear_content()
+        CalendarView(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_snapshots(self):
         if not self.engine.current_id:

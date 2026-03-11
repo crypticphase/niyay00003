@@ -74,6 +74,18 @@ class AIConnector:
         prompt = f"ขยายความเนื้อเรื่องส่วนนี้ให้เห็นภาพและอารมณ์ชัดเจนขึ้น:\n\n{short_text}"
         return self.ask(prompt, context)
 
+    def generate_names(self, category: str, style: str, context: str):
+        prompt = f"ช่วยคิดชื่อ {category} ในสไตล์ {style} มาให้หน่อยสัก 10 ชื่อที่เข้ากับโลกนี้"
+        return self.ask(prompt, context)
+
+    def get_worldbuilding_questions(self, context: str):
+        prompt = "ช่วยถามคำถามชวนคิด 5 ข้อเพื่อช่วยขยายรายละเอียดของโลกนี้ (เช่น ระบบเวทมนตร์, การเมือง, วัฒนธรรม)"
+        return self.ask(prompt, context)
+
+    def summarize_lore(self, context: str):
+        prompt = "สรุปข้อมูล Lore ทั้งหมดของโลกนี้เป็นย่อหน้าสั้นๆ สำหรับการ Pitch หรือแนะนำเรื่อง"
+        return self.ask(prompt, context)
+
     def generate_lore(self, mod_type: str, schema: List[str], context: str):
         schema_str = ", ".join(schema)
         prompt = f"สร้างข้อมูล {mod_type} ที่ละเอียดและเข้ากับโลกนี้ โดยให้มีฟิลด์ดังนี้: {schema_str}"

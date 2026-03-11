@@ -13,6 +13,7 @@ class ProjectManager:
         self.modules = {}
         self.plot = {"acts": []}
         self.timeline = {"eras": []}
+        self.calendar = {"months": [], "days_per_week": 7, "current_year": 1000}
         self.relations = []
         self.tags = []
         self.facts = []
@@ -73,6 +74,11 @@ class ProjectManager:
         }
         
         self.timeline = {"eras": [{"name": "Ancient Era", "events": []}]}
+        self.calendar = {
+            "months": ["Month 1", "Month 2", "Month 3", "Month 4"],
+            "days_per_week": 7,
+            "current_year": 1000
+        }
         self.modules = {m: [] for m in mods}
         self.relations = []
         self.tags = []
@@ -100,6 +106,11 @@ class ProjectManager:
             with open(timeline_path, "r", encoding="utf-8") as f:
                 self.timeline = json.load(f)
 
+        cal_path = os.path.join(p_dir, "lore", "calendar.json")
+        if os.path.exists(cal_path):
+            with open(cal_path, "r", encoding="utf-8") as f:
+                self.calendar = json.load(f)
+
         facts_path = os.path.join(p_dir, "lore", "facts.json")
         if os.path.exists(facts_path):
             with open(facts_path, "r", encoding="utf-8") as f:
@@ -121,6 +132,7 @@ class ProjectManager:
             ("world.json", self.world),
             (os.path.join("story", "plot.json"), self.plot),
             (os.path.join("lore", "timeline.json"), self.timeline),
+            (os.path.join("lore", "calendar.json"), self.calendar),
             (os.path.join("lore", "facts.json"), self.facts)
         ]
         
