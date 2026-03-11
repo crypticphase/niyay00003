@@ -30,6 +30,7 @@ class StoryEditor(tk.Frame):
         tk.Button(ai_tools, text="🔍 ขยายความ", command=self.ai_expand, bg="#6a5acd", fg="white", padx=10).pack(side=tk.LEFT, padx=5)
         tk.Button(ai_tools, text="📊 วิเคราะห์เรื่อง", command=self.ai_analyze, bg="#333", fg="white", padx=10).pack(side=tk.LEFT, padx=5)
         tk.Button(ai_tools, text="🎯 โหมดโฟกัส", command=self.toggle_focus, bg="#222", fg="#888", padx=10).pack(side=tk.RIGHT, padx=5)
+        tk.Button(ai_tools, text="📖 โหมดอ่าน", command=self.toggle_reading_mode, bg="#222", fg="#888", padx=10).pack(side=tk.RIGHT, padx=5)
         
         self.text = scrolledtext.ScrolledText(self, wrap=tk.WORD, font=("Georgia", 14), bg="#0f0f0f", fg="#bbb", insertbackground="white", padx=50, pady=50, borderwidth=0, undo=True)
         self.text.pack(fill=tk.BOTH, expand=True, padx=40, pady=10)
@@ -90,10 +91,23 @@ class StoryEditor(tk.Frame):
             self.header.pack_forget()
             self.footer.pack_forget()
             self.text.pack_configure(padx=200)
-            messagebox.showinfo("Nexus", "Focus Mode Enabled. Press ESC to exit (Not implemented, use button).")
         else:
             self.header.pack(fill=tk.X, padx=40, pady=20, before=self.text)
             self.footer.pack(fill=tk.X, padx=40, pady=10)
+            self.text.pack_configure(padx=40)
+
+    def toggle_reading_mode(self):
+        self.reading_mode = getattr(self, "reading_mode", False)
+        self.reading_mode = not self.reading_mode
+        if self.reading_mode:
+            self.header.pack_forget()
+            self.footer.pack_forget()
+            self.text.config(state=tk.DISABLED, bg="#1a1a1a", fg="#ddd", font=("Georgia", 18), spacing1=10, spacing2=10)
+            self.text.pack_configure(padx=150)
+        else:
+            self.header.pack(fill=tk.X, padx=40, pady=20, before=self.text)
+            self.footer.pack(fill=tk.X, padx=40, pady=10)
+            self.text.config(state=tk.NORMAL, bg="#0f0f0f", fg="#bbb", font=("Georgia", 14), spacing1=0, spacing2=0)
             self.text.pack_configure(padx=40)
 
     def load_chapter(self):

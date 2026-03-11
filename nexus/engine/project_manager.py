@@ -175,3 +175,58 @@ class ProjectManager:
         with open(os.path.join(snap_dir, "data.json"), "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
         return snap_id
+
+    def get_backlinks(self, entity_id: str) -> List[Dict[str, Any]]:
+        """Find all occurrences of [[entity_id]] in the project."""
+        if not self.current_id: return []
+        
+        backlinks = []
+        p_dir = self.get_dir()
+        pattern = f"[[{entity_id}]]"
+
+        # 1. Search Story Chapters
+        story_dir = os.path.join(p_dir, "story")
+        if os.path.exists(story_dir):
+            for filename in sorted(os.listdir(story_dir)):
+                if filename.endswith(".txt"):
+                    path = os.path.join(story_dir, filename)
+                    with open(path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                        if pattern in content:
+                            backlinks.append({
+                                "type": "story",
+                                "title": filename.replace(".txt", ""),
+                                "data": filename
+                            })
+
+        # 2. Search Modules (Descriptions/Notes)
+        for mod_name, items in self.modules.items():
+            for item in items:
+                item_str = str(item)
+                if pattern in item_str:
+                    backlinks.append({
+                        "type": "module",
+                        "title": f"{mod_name.capitalize()}: {item.get('name', 'Unnamed')}",
+                        "data": mod_name
+                    })
+
+        # 3. Search Facts
+        for fact in self.facts:
+            if pattern in fact.get("content", ""):
+                backlinks.append({
+                    "type": "fact",
+                    "title": "Quick Capture / Fact",
+                    "data": fact
+                })
+
+        # 4. Search Timeline
+        for era in self.timeline.get("eras", []):
+            for event in era.get("events", []):
+                if pattern in str(event):
+                    backlinks.append({
+                        "type": "timeline",
+                        "title": f"Timeline: {event.get('title', 'Event')}",
+                        "data": era["name"]
+                    })
+
+        return backlinks

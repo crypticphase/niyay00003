@@ -12,6 +12,8 @@ from nexus.ui.timeline import TimelineView
 from nexus.ui.calendar import CalendarView
 from fpdf import FPDF
 from nexus.ui.snapshots import SnapshotManager
+from nexus.ui.export_view import ExportManager
+from nexus.ui.search_view import GlobalSearch
 import os
 
 class MainWindow(tk.Tk):
@@ -27,6 +29,8 @@ class MainWindow(tk.Tk):
         
         self.bind("<Control-k>", lambda e: self.show_command_palette())
         self.bind("<Control-K>", lambda e: self.show_command_palette())
+        self.bind("<Control-f>", lambda e: self.show_global_search())
+        self.bind("<Control-F>", lambda e: self.show_global_search())
         self.bind("<Control-space>", lambda e: self.show_quick_capture())
         
         self.setup_layout()
@@ -83,6 +87,7 @@ class MainWindow(tk.Tk):
             commands = [
                 ("🌍 ไปที่: ตั้งค่าโลก", self.show_world_config),
                 ("📖 ไปที่: เขียนเนื้อเรื่อง", self.show_editor),
+                ("🔍 ค้นหาข้ามโปรเจกต์", self.show_global_search),
                 ("🤖 ไปที่: ผู้ช่วย AI", self.show_ai_panel),
                 ("📅 ไปที่: ปฏิทิน", self.show_calendar),
                 ("💾 บันทึกโปรเจกต์", self.engine.save),
@@ -205,8 +210,8 @@ class MainWindow(tk.Tk):
         
         bottom_items = [
             ("📸 จุดบันทึก (Snapshots)", self.show_snapshots),
-            ("📤 ส่งออก Markdown", self.export_project),
-            ("📄 ส่งออก PDF", self.export_pdf),
+            ("📤 ส่งออกเนื้อเรื่อง", self.show_export_manager),
+            ("🔍 ค้นหาข้ามโปรเจกต์", self.show_global_search),
             ("🏠 หน้าแรก", self.show_welcome)
         ]
         
@@ -457,7 +462,23 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("Snapshots", self.show_snapshots)])
         SnapshotManager(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
+
+    def show_export_manager(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
+        self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("Export", self.show_export_manager)])
+        ExportManager(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
+
+    def show_global_search(self, evt=None):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            return
+        GlobalSearch(self, self.engine)
 
     def export_project(self):
         if not self.engine.current_id: return

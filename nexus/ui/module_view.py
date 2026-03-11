@@ -23,6 +23,15 @@ class ModuleManager(tk.Frame):
         tk.Button(btn_row, text="✨ AI สร้างข้อมูล", command=self.ai_gen, bg="#8a2be2", fg="white", font=("Segoe UI", 9, "bold"), padx=15).pack(side=tk.LEFT, padx=5)
         tk.Button(btn_row, text="⚙️ ตั้งค่าฟิลด์", command=self.edit_schema, bg="#333", fg="white", font=("Segoe UI", 9, "bold"), padx=10).pack(side=tk.LEFT, padx=5)
 
+        # Search & Tag Filter
+        filter_frame = tk.Frame(self, bg="#0a0a0a")
+        filter_frame.pack(fill=tk.X, padx=40, pady=(0, 10))
+        
+        tk.Label(filter_frame, text="🔍 ค้นหา:", bg="#0a0a0a", fg="#444").pack(side=tk.LEFT)
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add("write", lambda *args: self.refresh_list())
+        tk.Entry(filter_frame, textvariable=self.search_var, bg="#111", fg="white", borderwidth=0).pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
+
         list_frame = tk.Frame(self, bg="#0a0a0a")
         list_frame.pack(fill=tk.BOTH, expand=True, padx=40)
         
@@ -31,6 +40,7 @@ class ModuleManager(tk.Frame):
         self.lb.pack(side=tk.LEFT, fill=tk.Y)
         
         for item in self.data: self.lb.insert(tk.END, item.get("name", "Unnamed"))
+        self.filtered_data = self.data[:]
         
         # Right Editor
         self.edit_scroll = tk.Canvas(list_frame, bg="#0a0a0a", highlightthickness=0)
@@ -102,6 +112,11 @@ class ModuleManager(tk.Frame):
 
         tk.Button(rel_frame, text="🔗 อ้างอิง", command=add_ref, bg="#222", fg="white").pack(side=tk.LEFT, padx=5)
 
+        # Backlinks Section
+        tk.Label(self.edit_frame, text="🔗 ถูกกล่าวถึงใน (Backlinks)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(25,0))
+        self.backlinks_frame = tk.Frame(self.edit_frame, bg="#0a0a0a")
+        self.backlinks_frame.pack(fill=tk.X, anchor="w", pady=5)
+
     def edit_schema(self):
         win = tk.Toplevel(self)
         win.title(f"Schema Editor: {self.mod_name}")
@@ -134,15 +149,26 @@ class ModuleManager(tk.Frame):
         new_item["relations"] = ""
         
         self.data.append(new_item)
-        self.lb.insert(tk.END, new_item["name"])
+        self.refresh_list()
         self.lb.selection_clear(0, tk.END)
         self.lb.selection_set(tk.END)
         self.on_select(None)
 
+    def refresh_list(self):
+        query = self.search_var.get().lower()
+        self.lb.delete(0, tk.END)
+        self.filtered_data = []
+        for item in self.data:
+            name = item.get("name", "").lower()
+            tags = item.get("tags", "").lower()
+            if query in name or query in tags:
+                self.lb.insert(tk.END, item.get("name", "Unnamed"))
+                self.filtered_data.append(item)
+
     def on_select(self, evt):
         if self.lb.curselection():
             idx = self.lb.curselection()[0]
-            item = self.data[idx]
+            item = self.filtered_data[idx]
             for field, widget in self.fields_widgets.items():
                 if isinstance(widget, tk.Text):
                     widget.delete("1.0", tk.END)
@@ -155,21 +181,38 @@ class ModuleManager(tk.Frame):
             self.tags_ent.insert(0, item.get("tags", ""))
             self.rel_ent.delete(0, tk.END)
             self.rel_ent.insert(0, item.get("relations", ""))
+            
+            self.refresh_backlinks(item.get("name", ""))
+
+    def refresh_backlinks(self, name):
+        for w in self.backlinks_frame.winfo_children(): w.destroy()
+        if not name: return
+        
+        entity_id = f"{self.mod_name}:{name}"
+        links = self.engine.get_backlinks(entity_id)
+        
+        if not links:
+            tk.Label(self.backlinks_frame, text="ยังไม่ถูกกล่าวถึงในส่วนอื่น", bg="#0a0a0a", fg="#333", font=("Segoe UI", 9)).pack(anchor="w")
+            return
+            
+        for link in links:
+            btn = tk.Button(self.backlinks_frame, text=f"• {link['title']}", bg="#0a0a0a", fg="#888", relief=tk.FLAT, anchor="w", font=("Segoe UI", 9), activebackground="#111", activeforeground="white")
+            btn.pack(fill=tk.X)
 
     def save_item(self):
         if self.lb.curselection():
             idx = self.lb.curselection()[0]
+            item = self.filtered_data[idx]
             for field, widget in self.fields_widgets.items():
                 if isinstance(widget, tk.Text):
-                    self.data[idx][field] = widget.get("1.0", tk.END).strip()
+                    item[field] = widget.get("1.0", tk.END).strip()
                 else:
-                    self.data[idx][field] = widget.get()
+                    item[field] = widget.get()
             
-            self.data[idx]["tags"] = self.tags_ent.get()
-            self.data[idx]["relations"] = self.rel_ent.get()
+            item["tags"] = self.tags_ent.get()
+            item["relations"] = self.rel_ent.get()
             
-            self.lb.delete(idx)
-            self.lb.insert(idx, self.data[idx].get("name", "Unnamed"))
+            self.refresh_list()
             self.engine.save()
             messagebox.showinfo("Nexus", "Entry updated.")
 
@@ -179,11 +222,12 @@ class ModuleManager(tk.Frame):
         new_item["tags"] = ""
         new_item["relations"] = ""
         self.data.append(new_item)
-        self.lb.insert(tk.END, "New Entry")
+        self.refresh_list()
 
     def delete_item(self):
         if self.lb.curselection():
             idx = self.lb.curselection()[0]
-            self.data.pop(idx)
-            self.lb.delete(idx)
+            item = self.filtered_data[idx]
+            self.data.remove(item)
+            self.refresh_list()
             self.engine.save()
