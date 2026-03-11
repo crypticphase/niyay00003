@@ -36,7 +36,17 @@ class StoryEditor(tk.Frame):
         
         self.text.bind("<KeyRelease>", self.on_key_release)
         
+        self.footer = tk.Frame(self, bg="#0a0a0a")
+        self.footer.pack(fill=tk.X, padx=40, pady=10)
+        
+        self.stats = tk.Label(self.footer, text="จำนวนคำ: 0", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
+        self.stats.pack(side=tk.RIGHT)
+        
+        self.goal_lbl = tk.Label(self.footer, text=f"เป้าหมาย: {self.engine.config.get('word_goal', 50000)}", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
+        self.goal_lbl.pack(side=tk.LEFT)
+
     def on_key_release(self, event):
+        self.update_stats()
         if event.char == "@":
             self.show_mention_popup()
 
@@ -73,17 +83,6 @@ class StoryEditor(tk.Frame):
         lb.bind("<Return>", select)
         win.bind("<Escape>", lambda e: win.destroy())
         lb.focus_set()
-        
-        self.footer = tk.Frame(self, bg="#0a0a0a")
-        self.footer.pack(fill=tk.X, padx=40, pady=10)
-        
-        self.stats = tk.Label(self.footer, text="จำนวนคำ: 0", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
-        self.stats.pack(side=tk.RIGHT)
-        
-        self.goal_lbl = tk.Label(self.footer, text=f"เป้าหมาย: {self.engine.config.get('word_goal', 50000)}", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
-        self.goal_lbl.pack(side=tk.LEFT)
-        
-        self.text.bind("<KeyRelease>", self.update_stats)
 
     def toggle_focus(self):
         self.focus_mode = not self.focus_mode
