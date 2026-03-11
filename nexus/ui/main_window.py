@@ -26,9 +26,35 @@ class MainWindow(tk.Tk):
         
         self.bind("<Control-k>", lambda e: self.show_command_palette())
         self.bind("<Control-K>", lambda e: self.show_command_palette())
+        self.bind("<Control-space>", lambda e: self.show_quick_capture())
         
         self.setup_layout()
         self.show_welcome()
+
+    def show_quick_capture(self):
+        win = tk.Toplevel(self)
+        win.title("Quick Capture")
+        win.geometry("400x250")
+        win.configure(bg="#111", padx=20, pady=20)
+        win.transient(self)
+        
+        tk.Label(win, text="💡 จดไอเดียด่วน (Quick Capture)", bg="#111", fg="#00ff00", font=("Segoe UI", 10, "bold")).pack(anchor="w")
+        
+        txt = tk.Text(win, height=5, bg="#222", fg="white", font=("Segoe UI", 11), borderwidth=0, insertbackground="white")
+        txt.pack(fill=tk.BOTH, expand=True, pady=10)
+        txt.focus_set()
+        
+        def save():
+            note = txt.get("1.0", tk.END).strip()
+            if note:
+                self.engine.facts.append({"content": note, "type": "quick_capture", "date": datetime.now().isoformat()})
+                self.engine.save()
+                messagebox.showinfo("Nexus", "บันทึกไอเดียลงใน Inbox แล้ว")
+            win.destroy()
+            
+        tk.Button(win, text="บันทึก (Enter)", command=save, bg="#007acc", fg="white", padx=20).pack(side=tk.RIGHT)
+        win.bind("<Return>", lambda e: save())
+        win.bind("<Escape>", lambda e: win.destroy())
 
     def show_command_palette(self):
         win = tk.Toplevel(self)
@@ -66,6 +92,24 @@ class MainWindow(tk.Tk):
                     btn = tk.Button(results_frame, text=text, command=lambda c=cmd: [c(), win.destroy()], 
                                     bg="#222", fg="#ccc", anchor="w", relief=tk.FLAT, pady=5)
                     btn.pack(fill=tk.X, pady=1)
+
+            # Recently Viewed
+            if self.engine.recently_viewed:
+                tk.Label(results_frame, text="RECENTLY VIEWED", bg="#111", fg="#444", font=("Segoe UI", 8)).pack(pady=5, anchor="w")
+                for r in self.engine.recently_viewed:
+                    if term in r["name"].lower():
+                        def go(item=r):
+                            if item["type"] == "nav":
+                                # This is tricky since we need to map names to functions
+                                # For now, let's just search lore
+                                pass
+                            elif item["type"] == "module":
+                                self.show_module_manager(item["data"])
+                            win.destroy()
+                        
+                        btn = tk.Button(results_frame, text=f"🕒 {r['name']}", command=go,
+                                        bg="#1a1a1a", fg="#666", anchor="w", relief=tk.FLAT, pady=5)
+                        btn.pack(fill=tk.X, pady=1)
 
             # Lore Entries
             if self.engine.current_id:
@@ -149,6 +193,7 @@ class MainWindow(tk.Tk):
     def show_welcome(self):
         self.clear_content()
         self.update_sidebar()
+        self.update_breadcrumb([("Home", self.show_welcome)])
         
         frame = tk.Frame(self.content, bg="#0a0a0a")
         frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
@@ -159,8 +204,71 @@ class MainWindow(tk.Tk):
         btn_frame = tk.Frame(frame, bg="#0a0a0a")
         btn_frame.pack(pady=40)
         
-        tk.Button(btn_frame, text="สร้างโลกใหม่", command=self.dialog_new_project, width=25, bg="#007acc", fg="white", pady=12, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=15)
+        tk.Button(btn_frame, text="สร้างโลกใหม่ (Wizard)", command=self.show_onboarding, width=25, bg="#007acc", fg="white", pady=12, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=15)
         tk.Button(btn_frame, text="โหลดโลกเดิม", command=self.dialog_load_project, width=25, bg="#222", fg="white", pady=12, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=15)
+
+    def show_onboarding(self):
+        win = tk.Toplevel(self)
+        win.title("Nexus Onboarding Wizard")
+        win.geometry("500x600")
+        win.configure(bg="#111", padx=30, pady=30)
+        
+        step = tk.IntVar(value=1)
+        
+        def next_step():
+            if step.get() == 1:
+                # Step 1: Name & Genre
+                name = name_ent.get()
+                genre = genre_var.get()
+                if not name: return
+                self.engine.create(name, genre, "Standard")
+                step.set(2)
+                render()
+            elif step.get() == 2:
+                # Step 2: World Theme
+                self.engine.world["theme"] = theme_ent.get()
+                self.engine.world["history_summary"] = hist_ent.get("1.0", tk.END)
+                self.engine.save()
+                step.set(3)
+                render()
+            else:
+                win.destroy()
+                self.show_welcome()
+
+        def render():
+            for w in win.winfo_children(): w.destroy()
+            if step.get() == 1:
+                tk.Label(win, text="ขั้นที่ 1: พื้นฐานจักรวาล", font=("Segoe UI", 18, "bold"), bg="#111", fg="#00ff00").pack(pady=20)
+                tk.Label(win, text="ชื่อโลกของคุณ:", bg="#111", fg="white").pack(anchor="w")
+                nonlocal name_ent
+                name_ent = tk.Entry(win, font=("Segoe UI", 12))
+                name_ent.pack(fill=tk.X, pady=10)
+                
+                tk.Label(win, text="แนวเรื่อง (Genre):", bg="#111", fg="white").pack(anchor="w")
+                nonlocal genre_var
+                genre_var = tk.StringVar(value="Fantasy")
+                for g in ["Fantasy", "Sci-Fi", "Mystery", "Horror"]:
+                    tk.Radiobutton(win, text=g, variable=genre_var, value=g, bg="#111", fg="white", selectcolor="#222").pack(anchor="w")
+                
+            elif step.get() == 2:
+                tk.Label(win, text="ขั้นที่ 2: จิตวิญญาณของโลก", font=("Segoe UI", 18, "bold"), bg="#111", fg="#00ff00").pack(pady=20)
+                tk.Label(win, text="ธีมหลัก (เช่น ความหวัง, การล่มสลาย):", bg="#111", fg="white").pack(anchor="w")
+                nonlocal theme_ent
+                theme_ent = tk.Entry(win, font=("Segoe UI", 12))
+                theme_ent.pack(fill=tk.X, pady=10)
+                
+                tk.Label(win, text="ประวัติศาสตร์ย่อ:", bg="#111", fg="white").pack(anchor="w")
+                nonlocal hist_ent
+                hist_ent = tk.Text(win, height=5, font=("Segoe UI", 11))
+                hist_ent.pack(fill=tk.X, pady=10)
+
+            tk.Button(win, text="ถัดไป ->", command=next_step, bg="#007acc", fg="white", pady=10).pack(side=tk.BOTTOM, fill=tk.X)
+
+        name_ent = None
+        genre_var = None
+        theme_ent = None
+        hist_ent = None
+        render()
 
     def dialog_new_project(self):
         win = tk.Toplevel(self)

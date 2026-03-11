@@ -34,6 +34,46 @@ class StoryEditor(tk.Frame):
         self.text = scrolledtext.ScrolledText(self, wrap=tk.WORD, font=("Georgia", 14), bg="#0f0f0f", fg="#bbb", insertbackground="white", padx=50, pady=50, borderwidth=0, undo=True)
         self.text.pack(fill=tk.BOTH, expand=True, padx=40, pady=10)
         
+        self.text.bind("<KeyRelease>", self.on_key_release)
+        
+    def on_key_release(self, event):
+        if event.char == "@":
+            self.show_mention_popup()
+
+    def show_mention_popup(self):
+        # Get cursor position in pixels
+        pos = self.text.bbox(tk.INSERT)
+        if not pos: return
+        
+        win = tk.Toplevel(self)
+        win.overrideredirect(True) # No title bar
+        win.geometry(f"200x300+{self.winfo_rootx() + pos[0] + 50}+{self.winfo_rooty() + pos[1] + 150}")
+        win.configure(bg="#1a1a1a")
+        
+        lb = tk.Listbox(win, bg="#1a1a1a", fg="#00ff00", borderwidth=0, highlightthickness=0)
+        lb.pack(fill=tk.BOTH, expand=True)
+        
+        all_items = []
+        for m, items in self.engine.modules.items():
+            for it in items:
+                all_items.append(f"{m}:{it.get('name')}")
+        
+        for item in all_items:
+            lb.insert(tk.END, item)
+            
+        def select(evt=None):
+            if lb.curselection():
+                val = lb.get(lb.curselection())
+                # Replace @ with link
+                self.text.delete("insert-1c", "insert")
+                self.text.insert(tk.INSERT, f"[[{val}]]")
+                win.destroy()
+        
+        lb.bind("<Double-Button-1>", select)
+        lb.bind("<Return>", select)
+        win.bind("<Escape>", lambda e: win.destroy())
+        lb.focus_set()
+        
         self.footer = tk.Frame(self, bg="#0a0a0a")
         self.footer.pack(fill=tk.X, padx=40, pady=10)
         

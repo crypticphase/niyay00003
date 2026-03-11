@@ -14,6 +14,7 @@ class ProjectManager:
         self.plot = {"acts": []}
         self.timeline = {"eras": []}
         self.calendar = {"months": [], "days_per_week": 7, "current_year": 1000}
+        self.recently_viewed = []
         self.relations = []
         self.tags = []
         self.facts = []
@@ -111,6 +112,11 @@ class ProjectManager:
             with open(cal_path, "r", encoding="utf-8") as f:
                 self.calendar = json.load(f)
 
+        rv_path = os.path.join(p_dir, ".nexus", "recently_viewed.json")
+        if os.path.exists(rv_path):
+            with open(rv_path, "r", encoding="utf-8") as f:
+                self.recently_viewed = json.load(f)
+
         facts_path = os.path.join(p_dir, "lore", "facts.json")
         if os.path.exists(facts_path):
             with open(facts_path, "r", encoding="utf-8") as f:
@@ -133,6 +139,7 @@ class ProjectManager:
             (os.path.join("story", "plot.json"), self.plot),
             (os.path.join("lore", "timeline.json"), self.timeline),
             (os.path.join("lore", "calendar.json"), self.calendar),
+            (os.path.join(".nexus", "recently_viewed.json"), self.recently_viewed),
             (os.path.join("lore", "facts.json"), self.facts)
         ]
         
