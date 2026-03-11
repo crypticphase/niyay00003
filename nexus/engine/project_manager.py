@@ -34,6 +34,7 @@ class ProjectManager:
         os.makedirs(os.path.join(p_dir, "story"))
         os.makedirs(os.path.join(p_dir, "lore"))
         os.makedirs(os.path.join(p_dir, "snapshots"))
+        os.makedirs(os.path.join(p_dir, ".nexus"))
         
         # Default Modules with Schema
         mods = ["characters", "locations", "history", "items", "kingdoms", "factions", "magic_system", "planets", "weapons"]
@@ -144,11 +145,14 @@ class ProjectManager:
         ]
         
         for filename, data in files:
-            with open(os.path.join(p_dir, filename), "w", encoding="utf-8") as f:
+            full_path = os.path.join(p_dir, filename)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            with open(full_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
                 
         for mod, data in self.modules.items():
             path = os.path.join(p_dir, "modules", f"{mod}.json")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
 
