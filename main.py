@@ -4,7 +4,7 @@ import subprocess
 
 def install_dependencies():
     """Check and install missing dependencies automatically."""
-    required = ["google-generativeai", "python-dotenv", "fpdf2", "pillow"]
+    required = ["google-generativeai", "python-dotenv", "fpdf2", "pillow", "requests"]
     for lib in required:
         try:
             if lib == "google-generativeai":
@@ -15,6 +15,8 @@ def install_dependencies():
                 import fpdf
             elif lib == "pillow":
                 import PIL
+            elif lib == "requests":
+                import requests
         except ImportError:
             print(f"[*] Missing {lib}. Installing...")
             subprocess.check_call([sys.executable, "-m", "pip", "install", lib])

@@ -53,24 +53,33 @@ class MainWindow(tk.Tk):
             ("🤖 ผู้ช่วย AI", self.show_ai_panel),
         ]
         
-        if self.engine.current_id:
-            tk.Label(self.nav_frame, text="หมวดหมู่ข้อมูล", font=("Segoe UI", 8, "bold"), bg="#111", fg="#444").pack(pady=(15, 5), anchor="w", padx=10)
-            for mod in self.engine.config.get("modules", []):
-                label = f"  {mod.replace('_', ' ').capitalize()}"
-                nav_items.append((label, lambda m=mod: self.show_module_manager(m)))
-
-        nav_items.append(("", None)) # Spacer
-        nav_items.append(("📸 จุดบันทึก (Snapshots)", self.show_snapshots))
-        nav_items.append(("📤 ส่งออก Markdown", self.export_project))
-        nav_items.append(("📄 ส่งออก PDF", self.export_pdf))
-        nav_items.append(("🏠 หน้าแรก", self.show_welcome))
-
         for text, cmd in nav_items:
-            if not text:
-                tk.Frame(self.nav_frame, height=1, bg="#222").pack(fill=tk.X, pady=10)
-                continue
             btn = tk.Button(self.nav_frame, text=text, command=cmd, bg="#111", fg="#ccc", 
-                            relief=tk.FLAT, anchor="w", padx=15, pady=8, font=("Segoe UI", 10),
+                            relief=tk.FLAT, anchor="w", padx=15, pady=8, font=("Segoe UI", 10, "bold"),
+                            activebackground="#222", activeforeground="white")
+            btn.pack(fill=tk.X)
+
+        if self.engine.current_id:
+            tk.Label(self.nav_frame, text="คลังข้อมูล (LORE)", font=("Segoe UI", 8, "bold"), bg="#111", fg="#444").pack(pady=(15, 5), anchor="w", padx=10)
+            for mod in self.engine.config.get("modules", []):
+                label = f"  • {mod.replace('_', ' ').capitalize()}"
+                btn = tk.Button(self.nav_frame, text=label, command=lambda m=mod: self.show_module_manager(m), 
+                                bg="#111", fg="#888", relief=tk.FLAT, anchor="w", padx=20, pady=5, font=("Segoe UI", 9),
+                                activebackground="#1a1a1a", activeforeground="#00ff00")
+                btn.pack(fill=tk.X)
+
+        tk.Frame(self.nav_frame, height=1, bg="#222").pack(fill=tk.X, pady=10)
+        
+        bottom_items = [
+            ("📸 จุดบันทึก (Snapshots)", self.show_snapshots),
+            ("📤 ส่งออก Markdown", self.export_project),
+            ("📄 ส่งออก PDF", self.export_pdf),
+            ("🏠 หน้าแรก", self.show_welcome)
+        ]
+        
+        for text, cmd in bottom_items:
+            btn = tk.Button(self.nav_frame, text=text, command=cmd, bg="#111", fg="#666", 
+                            relief=tk.FLAT, anchor="w", padx=15, pady=5, font=("Segoe UI", 9),
                             activebackground="#222", activeforeground="white")
             btn.pack(fill=tk.X)
 

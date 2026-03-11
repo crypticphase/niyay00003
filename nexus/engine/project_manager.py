@@ -34,7 +34,7 @@ class ProjectManager:
         os.makedirs(os.path.join(p_dir, "snapshots"))
         
         # Default Modules with Schema
-        mods = ["characters", "history", "items", "kingdoms", "factions", "magic_system", "planets", "weapons"]
+        mods = ["characters", "locations", "history", "items", "kingdoms", "factions", "magic_system", "planets", "weapons"]
         
         self.config = {
             "project_id": self.current_id,
@@ -48,6 +48,7 @@ class ProjectManager:
             "daily_goal": 500,
             "schemas": {
                 "characters": ["name", "age", "role", "personality", "abilities", "backstory"],
+                "locations": ["name", "type", "parent_location", "description", "climate", "coordinates"],
                 "weapons": ["name", "type", "owner", "power_level", "history"],
                 "items": ["name", "type", "description", "owner"],
                 "kingdoms": ["name", "ruler", "capital", "population", "description"]

@@ -1,35 +1,48 @@
 import os
-import google.generativeai as genai
+import requests
+import json
 from typing import Dict, List, Any
 
 class AIConnector:
-    """The Ultimate AI Connector for Nexus God Writer."""
+    """The Ultimate AI Connector for Nexus God Writer using Grok (xAI)."""
     def __init__(self):
-        self.api_key = os.getenv("GEMINI_API_KEY")
-        if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-3.1-pro-preview')
-        else:
-            self.model = None
+        self.api_key = os.getenv("XAI_API_KEY")
+        self.api_url = "https://api.x.ai/v1/chat/completions"
+        self.model_name = "grok-beta" # คุณสามารถเปลี่ยนเป็น grok-2 ได้ถ้าต้องการ
 
     def ask(self, prompt: str, context: str):
-        if not self.model: return "Error: Gemini API Key not found."
+        if not self.api_key: 
+            return "ข้อผิดพลาด: ไม่พบ XAI_API_KEY ในระบบ กรุณาตั้งค่า Environment Variable"
         
-        full_prompt = f"""
-        System: You are NEXUS GOD WRITER, a professional worldbuilding and story assistant.
-        Use the following world context to help the writer. Be creative, consistent, and detailed.
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
         
-        Context:
-        {context}
-        
-        User Request:
-        {prompt}
-        """
+        system_instruction = f"""คุณคือ NEXUS GOD WRITER ผู้ช่วยนักเขียนนิยายและนักสร้างโลกมืออาชีพ 
+ใช้บริบทของโลก (Context) ต่อไปนี้เพื่อช่วยเหลือผู้เขียน จงมีความคิดสร้างสรรค์ รักษาความสมเหตุสมผล และให้รายละเอียดที่ลึกซึ้ง
+
+บริบทของโลก:
+{context}"""
+
+        payload = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.7
+        }
+
         try:
-            response = self.model.generate_content(full_prompt)
-            return response.text
+            response = requests.post(self.api_url, headers=headers, data=json.dumps(payload))
+            if response.status_status == 200:
+                result = response.json()
+                return result["choices"][0]["message"]["content"]
+            else:
+                return f"Grok API Error ({response.status_code}): {response.text}"
         except Exception as e:
-            return f"AI Error: {str(e)}"
+            return f"AI Connection Error: {str(e)}"
 
     def check_consistency(self, context: str):
         prompt = "Analyze the entire world lore and story for any contradictions, plot holes, or character inconsistencies. Provide a detailed report."
@@ -37,19 +50,31 @@ class AIConnector:
 
     def analyze_story_director(self, story_content: str, context: str):
         prompt = f"""
-        Analyze the following story content for:
-        1. Conflict: Is it strong enough?
-        2. Pacing: Is it too fast or slow?
-        3. Tension: How is the emotional curve?
-        4. Character Arc: Are the characters developing?
-        5. Three-Act Structure: Where are we in the story?
+        วิเคราะห์เนื้อเรื่องต่อไปนี้ในด้าน:
+        1. ความขัดแย้ง (Conflict): รุนแรงพอไหม?
+        2. จังหวะเรื่อง (Pacing): เร็วหรือช้าไปไหม?
+        3. ความตึงเครียด (Tension): กราฟอารมณ์เป็นอย่างไร?
+        4. การพัฒนาตัวละคร (Character Arc): ตัวละครมีการเปลี่ยนแปลงไหม?
+        5. โครงสร้าง 3 องก์: ตอนนี้เราอยู่จุดไหนของเรื่อง?
         
-        Story Content:
+        เนื้อเรื่อง:
         {story_content}
         """
         return self.ask(prompt, context)
 
+    def continue_story(self, current_text: str, context: str):
+        prompt = f"เขียนเนื้อเรื่องต่อจากข้อความนี้ โดยรักษาโทนและอารมณ์เดิม:\n\n{current_text}"
+        return self.ask(prompt, context)
+
+    def rewrite_story(self, selected_text: str, instruction: str, context: str):
+        prompt = f"เกลาข้อความต่อไปนี้ตามคำสั่ง: '{instruction}'\n\nข้อความเดิม: {selected_text}"
+        return self.ask(prompt, context)
+
+    def expand_story(self, short_text: str, context: str):
+        prompt = f"ขยายความเนื้อเรื่องส่วนนี้ให้เห็นภาพและอารมณ์ชัดเจนขึ้น:\n\n{short_text}"
+        return self.ask(prompt, context)
+
     def generate_lore(self, mod_type: str, schema: List[str], context: str):
         schema_str = ", ".join(schema)
-        prompt = f"Generate a detailed {mod_type} entry that fits perfectly into this world. Return in format: {schema_str}"
+        prompt = f"สร้างข้อมูล {mod_type} ที่ละเอียดและเข้ากับโลกนี้ โดยให้มีฟิลด์ดังนี้: {schema_str}"
         return self.ask(prompt, context)

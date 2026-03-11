@@ -75,8 +75,32 @@ class ModuleManager(tk.Frame):
         self.tags_ent.pack(pady=5, anchor="w")
         
         tk.Label(self.edit_frame, text="ความสัมพันธ์ (เชื่อมโยงข้อมูล)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(15,0))
-        self.rel_ent = tk.Entry(self.edit_frame, width=50, font=("Segoe UI", 12), bg="#111", fg="#ccc", borderwidth=0)
-        self.rel_ent.pack(pady=5, anchor="w")
+        rel_frame = tk.Frame(self.edit_frame, bg="#0a0a0a")
+        rel_frame.pack(fill=tk.X, anchor="w")
+        
+        self.rel_ent = tk.Entry(rel_frame, width=40, font=("Segoe UI", 12), bg="#111", fg="#ccc", borderwidth=0)
+        self.rel_ent.pack(side=tk.LEFT, pady=5)
+        
+        def add_ref():
+            win = tk.Toplevel(self)
+            win.title("เลือกข้อมูลเพื่อเชื่อมโยง")
+            win.geometry("300x400")
+            lb = tk.Listbox(win)
+            lb.pack(fill=tk.BOTH, expand=True)
+            for m, items in self.engine.modules.items():
+                for it in items:
+                    lb.insert(tk.END, f"{m}:{it.get('name')}")
+            
+            def select():
+                if lb.curselection():
+                    val = lb.get(lb.curselection())
+                    current = self.rel_ent.get()
+                    self.rel_ent.delete(0, tk.END)
+                    self.rel_ent.insert(0, f"{current}, {val}" if current else val)
+                    win.destroy()
+            tk.Button(win, text="เชื่อมโยง", command=select).pack()
+
+        tk.Button(rel_frame, text="🔗 อ้างอิง", command=add_ref, bg="#222", fg="white").pack(side=tk.LEFT, padx=5)
 
     def edit_schema(self):
         win = tk.Toplevel(self)
