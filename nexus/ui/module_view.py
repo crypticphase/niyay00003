@@ -20,8 +20,8 @@ class ModuleManager(tk.Frame):
         btn_row = tk.Frame(header, bg="#0a0a0a")
         btn_row.pack(side=tk.RIGHT)
         
-        tk.Button(btn_row, text="✨ AI GENERATE", command=self.ai_gen, bg="#8a2be2", fg="white", font=("Segoe UI", 9, "bold"), padx=15).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_row, text="⚙️ SCHEMA", command=self.edit_schema, bg="#333", fg="white", font=("Segoe UI", 9, "bold"), padx=10).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_row, text="✨ AI สร้างข้อมูล", command=self.ai_gen, bg="#8a2be2", fg="white", font=("Segoe UI", 9, "bold"), padx=15).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_row, text="⚙️ ตั้งค่าฟิลด์", command=self.edit_schema, bg="#333", fg="white", font=("Segoe UI", 9, "bold"), padx=10).pack(side=tk.LEFT, padx=5)
 
         list_frame = tk.Frame(self, bg="#0a0a0a")
         list_frame.pack(fill=tk.BOTH, expand=True, padx=40)
@@ -47,9 +47,9 @@ class ModuleManager(tk.Frame):
         # Action Buttons
         btn_row = tk.Frame(self.edit_frame, bg="#0a0a0a")
         btn_row.pack(pady=30, anchor="w")
-        tk.Button(btn_row, text="UPDATE", command=self.save_item, bg="#007acc", fg="white", width=15, pady=8).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_row, text="ADD NEW", command=self.add_new, bg="#222", fg="white", width=15, pady=8).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_row, text="DELETE", command=self.delete_item, bg="#cc0000", fg="white", width=10, pady=8).pack(side=tk.LEFT, padx=20)
+        tk.Button(btn_row, text="อัปเดตข้อมูล", command=self.save_item, bg="#007acc", fg="white", width=15, pady=8).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_row, text="เพิ่มใหม่", command=self.add_new, bg="#222", fg="white", width=15, pady=8).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_row, text="ลบข้อมูล", command=self.delete_item, bg="#cc0000", fg="white", width=10, pady=8).pack(side=tk.LEFT, padx=20)
 
     def render_fields(self):
         for widget in self.edit_frame.winfo_children():
@@ -70,11 +70,11 @@ class ModuleManager(tk.Frame):
                 self.fields_widgets[field] = ent
 
         # Standard Fields: Tags & Relationships
-        tk.Label(self.edit_frame, text="TAGS (comma separated)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(15,0))
+        tk.Label(self.edit_frame, text="แท็ก (คั่นด้วยคอมม่า)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(15,0))
         self.tags_ent = tk.Entry(self.edit_frame, width=50, font=("Segoe UI", 12), bg="#111", fg="#ccc", borderwidth=0)
         self.tags_ent.pack(pady=5, anchor="w")
         
-        tk.Label(self.edit_frame, text="RELATIONSHIPS (linked entries)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(15,0))
+        tk.Label(self.edit_frame, text="ความสัมพันธ์ (เชื่อมโยงข้อมูล)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(15,0))
         self.rel_ent = tk.Entry(self.edit_frame, width=50, font=("Segoe UI", 12), bg="#111", fg="#ccc", borderwidth=0)
         self.rel_ent.pack(pady=5, anchor="w")
 

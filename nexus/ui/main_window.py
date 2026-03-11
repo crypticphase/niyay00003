@@ -16,7 +16,7 @@ class MainWindow(tk.Tk):
     """The Ultimate Application Window for Nexus God Writer."""
     def __init__(self):
         super().__init__()
-        self.title("NEXUS GOD WRITER - The Ultimate Worldbuilding & Story Engine")
+        self.title("NEXUS GOD WRITER - สุดยอดเครื่องมือสร้างโลกและเขียนนิยาย")
         self.geometry("1400x900")
         self.configure(bg="#0a0a0a")
         
@@ -45,25 +45,25 @@ class MainWindow(tk.Tk):
             widget.destroy()
             
         nav_items = [
-            ("🌍 World Wizard", self.show_world_config),
-            ("📖 Story Editor", self.show_editor),
-            ("🗺️ Plot Planner", self.show_plot_planner),
-            ("📜 Timeline", self.show_timeline),
-            ("📚 Lore Wiki", self.show_lore_wiki),
-            ("🤖 AI Assistant", self.show_ai_panel),
+            ("🌍 ตั้งค่าโลก", self.show_world_config),
+            ("📖 เขียนเนื้อเรื่อง", self.show_editor),
+            ("🗺️ วางโครงเรื่อง", self.show_plot_planner),
+            ("📜 เส้นเวลา", self.show_timeline),
+            ("📚 คลังข้อมูล Lore", self.show_lore_wiki),
+            ("🤖 ผู้ช่วย AI", self.show_ai_panel),
         ]
         
         if self.engine.current_id:
-            tk.Label(self.nav_frame, text="MODULES", font=("Segoe UI", 8, "bold"), bg="#111", fg="#444").pack(pady=(15, 5), anchor="w", padx=10)
+            tk.Label(self.nav_frame, text="หมวดหมู่ข้อมูล", font=("Segoe UI", 8, "bold"), bg="#111", fg="#444").pack(pady=(15, 5), anchor="w", padx=10)
             for mod in self.engine.config.get("modules", []):
                 label = f"  {mod.replace('_', ' ').capitalize()}"
                 nav_items.append((label, lambda m=mod: self.show_module_manager(m)))
 
         nav_items.append(("", None)) # Spacer
-        nav_items.append(("📸 Snapshots", self.show_snapshots))
-        nav_items.append(("📤 Export Markdown", self.export_project))
-        nav_items.append(("📄 Export PDF", self.export_pdf))
-        nav_items.append(("🏠 Home", self.show_welcome))
+        nav_items.append(("📸 จุดบันทึก (Snapshots)", self.show_snapshots))
+        nav_items.append(("📤 ส่งออก Markdown", self.export_project))
+        nav_items.append(("📄 ส่งออก PDF", self.export_pdf))
+        nav_items.append(("🏠 หน้าแรก", self.show_welcome))
 
         for text, cmd in nav_items:
             if not text:
@@ -86,31 +86,31 @@ class MainWindow(tk.Tk):
         frame.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
         
         tk.Label(frame, text="NEXUS GOD WRITER", font=("Impact", 56), bg="#0a0a0a", fg="white").pack()
-        tk.Label(frame, text="The Ultimate Worldbuilding & Story Engine", font=("Segoe UI", 16), bg="#0a0a0a", fg="#666").pack(pady=10)
+        tk.Label(frame, text="สุดยอดเครื่องมือสร้างโลกและเขียนนิยายระดับพระเจ้า", font=("Segoe UI", 16), bg="#0a0a0a", fg="#666").pack(pady=10)
         
         btn_frame = tk.Frame(frame, bg="#0a0a0a")
         btn_frame.pack(pady=40)
         
-        tk.Button(btn_frame, text="CREATE NEW WORLD", command=self.dialog_new_project, width=25, bg="#007acc", fg="white", pady=12, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=15)
-        tk.Button(btn_frame, text="LOAD EXISTING", command=self.dialog_load_project, width=25, bg="#222", fg="white", pady=12, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=15)
+        tk.Button(btn_frame, text="สร้างโลกใหม่", command=self.dialog_new_project, width=25, bg="#007acc", fg="white", pady=12, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=15)
+        tk.Button(btn_frame, text="โหลดโลกเดิม", command=self.dialog_load_project, width=25, bg="#222", fg="white", pady=12, font=("Segoe UI", 10, "bold")).pack(side=tk.LEFT, padx=15)
 
     def dialog_new_project(self):
         win = tk.Toplevel(self)
-        win.title("Initialize New Nexus")
+        win.title("เริ่มต้นสร้างจักรวาลใหม่")
         win.geometry("450x500")
         win.configure(padx=30, pady=30, bg="#1a1a1a")
         
-        tk.Label(win, text="Project Name", bg="#1a1a1a", fg="#888").pack(anchor="w")
+        tk.Label(win, text="ชื่อโปรเจกต์ / ชื่อเรื่อง", bg="#1a1a1a", fg="#888").pack(anchor="w")
         name_ent = tk.Entry(win, width=40, font=("Segoe UI", 11), bg="#222", fg="white")
         name_ent.pack(pady=5)
         
-        tk.Label(win, text="Genre", bg="#1a1a1a", fg="#888").pack(anchor="w", pady=(10,0))
+        tk.Label(win, text="แนวเรื่อง (Genre)", bg="#1a1a1a", fg="#888").pack(anchor="w", pady=(10,0))
         genre_ent = tk.Entry(win, width=40, font=("Segoe UI", 11), bg="#222", fg="white")
         genre_ent.pack(pady=5)
         
-        tk.Label(win, text="World Type", bg="#1a1a1a", fg="#888").pack(anchor="w", pady=(10,0))
+        tk.Label(win, text="ประเภทของโลก", bg="#1a1a1a", fg="#888").pack(anchor="w", pady=(10,0))
         wtype_var = tk.StringVar(value="fantasy")
-        cb = ttk.Combobox(win, textvariable=wtype_var, values=["fantasy", "sci-fi", "cyberpunk", "horror", "romance", "historical"])
+        cb = ttk.Combobox(win, textvariable=wtype_var, values=["แฟนตาซี", "ไซไฟ", "ไซเบอร์พังค์", "สยองขวัญ", "โรแมนติก", "ประวัติศาสตร์"])
         cb.pack(pady=5, fill=tk.X)
         
         def create():
@@ -119,9 +119,9 @@ class MainWindow(tk.Tk):
                 win.destroy()
                 self.show_world_config()
             else:
-                messagebox.showwarning("Nexus", "Project name is mandatory.")
+                messagebox.showwarning("Nexus", "กรุณาใส่ชื่อโปรเจกต์")
                 
-        tk.Button(win, text="GENERATE PROJECT", command=create, bg="#00ff00", fg="black", pady=12, font=("Segoe UI", 11, "bold")).pack(pady=30, fill=tk.X)
+        tk.Button(win, text="สร้างโปรเจกต์", command=create, bg="#00ff00", fg="black", pady=12, font=("Segoe UI", 11, "bold")).pack(pady=30, fill=tk.X)
 
     def dialog_load_project(self):
         projects = [d for d in os.listdir("projects") if os.path.isdir(os.path.join("projects", d))]
@@ -147,17 +147,17 @@ class MainWindow(tk.Tk):
     def show_world_config(self):
         self.clear_content()
         self.update_sidebar()
-        tk.Label(self.content, text="🌍 WORLD WIZARD", font=("Segoe UI", 28, "bold"), bg="#0a0a0a", fg="white").pack(anchor="w", padx=40, pady=30)
+        tk.Label(self.content, text="🌍 ตั้งค่าโลก (World Wizard)", font=("Segoe UI", 28, "bold"), bg="#0a0a0a", fg="white").pack(anchor="w", padx=40, pady=30)
         
         form = tk.Frame(self.content, bg="#0a0a0a")
         form.pack(fill=tk.BOTH, expand=True, padx=40)
         
-        tk.Label(form, text="World Name", bg="#0a0a0a", fg="#666").pack(anchor="w")
+        tk.Label(form, text="ชื่อโลก / ชื่ออาณาจักร", bg="#0a0a0a", fg="#666").pack(anchor="w")
         name_ent = tk.Entry(form, width=60, font=("Segoe UI", 12), bg="#111", fg="white")
         name_ent.insert(0, self.engine.world.get("world_name", ""))
         name_ent.pack(pady=5, anchor="w")
         
-        tk.Label(form, text="Lore Summary", bg="#0a0a0a", fg="#666").pack(anchor="w", pady=(10,0))
+        tk.Label(form, text="สรุปประวัติศาสตร์และข้อมูลเบื้องต้น", bg="#0a0a0a", fg="#666").pack(anchor="w", pady=(10,0))
         hist_text = tk.Text(form, width=90, height=15, bg="#111", fg="white", font=("Segoe UI", 11))
         hist_text.insert("1.0", self.engine.world.get("history_summary", ""))
         hist_text.pack(pady=5, anchor="w")
@@ -166,35 +166,63 @@ class MainWindow(tk.Tk):
             self.engine.world["world_name"] = name_ent.get()
             self.engine.world["history_summary"] = hist_text.get("1.0", tk.END).strip()
             self.engine.save()
-            messagebox.showinfo("Nexus", "World data synchronized.")
+            messagebox.showinfo("Nexus", "บันทึกข้อมูลโลกเรียบร้อยแล้ว")
             
-        tk.Button(form, text="SAVE WORLD DATA", command=save, bg="#007acc", fg="white", padx=30, pady=12, font=("Segoe UI", 10, "bold")).pack(pady=30, anchor="w")
+        tk.Button(form, text="บันทึกข้อมูลโลก", command=save, bg="#007acc", fg="white", padx=30, pady=12, font=("Segoe UI", 10, "bold")).pack(pady=30, anchor="w")
 
     def show_editor(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
         StoryEditor(self.content, self.engine, self.ai).pack(fill=tk.BOTH, expand=True)
 
     def show_module_manager(self, mod_name):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
         ModuleManager(self.content, self.engine, self.ai, mod_name).pack(fill=tk.BOTH, expand=True)
 
     def show_ai_panel(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
         AIPanel(self.content, self.engine, self.ai).pack(fill=tk.BOTH, expand=True)
 
     def show_lore_wiki(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
         LoreWiki(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_plot_planner(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
         PlotPlanner(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_timeline(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
         TimelineView(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_snapshots(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
         SnapshotManager(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 

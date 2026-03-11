@@ -16,13 +16,13 @@ class StoryEditor(tk.Frame):
         self.header = tk.Frame(self, bg="#0a0a0a")
         self.header.pack(fill=tk.X, padx=40, pady=20)
         
-        tk.Label(self.header, text="📖 STORY EDITOR", font=("Segoe UI", 28, "bold"), bg="#0a0a0a", fg="white").pack(side=tk.LEFT)
+        tk.Label(self.header, text="📖 เขียนเนื้อเรื่อง", font=("Segoe UI", 28, "bold"), bg="#0a0a0a", fg="white").pack(side=tk.LEFT)
         
         btn_row = tk.Frame(self.header, bg="#0a0a0a")
         btn_row.pack(side=tk.RIGHT)
         
-        tk.Button(btn_row, text="FOCUS MODE", command=self.toggle_focus, bg="#333", fg="white", padx=10).pack(side=tk.LEFT, padx=5)
-        tk.Button(btn_row, text="AI DIRECTOR", command=self.ai_analyze, bg="#8a2be2", fg="white", padx=10).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_row, text="โหมดโฟกัส", command=self.toggle_focus, bg="#333", fg="white", padx=10).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_row, text="AI วิเคราะห์เรื่อง", command=self.ai_analyze, bg="#8a2be2", fg="white", padx=10).pack(side=tk.LEFT, padx=5)
         
         self.text = scrolledtext.ScrolledText(self, wrap=tk.WORD, font=("Georgia", 14), bg="#0f0f0f", fg="#bbb", insertbackground="white", padx=50, pady=50, borderwidth=0, undo=True)
         self.text.pack(fill=tk.BOTH, expand=True, padx=40, pady=10)
@@ -30,10 +30,10 @@ class StoryEditor(tk.Frame):
         self.footer = tk.Frame(self, bg="#0a0a0a")
         self.footer.pack(fill=tk.X, padx=40, pady=10)
         
-        self.stats = tk.Label(self.footer, text="Words: 0", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
+        self.stats = tk.Label(self.footer, text="จำนวนคำ: 0", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
         self.stats.pack(side=tk.RIGHT)
         
-        self.goal_lbl = tk.Label(self.footer, text=f"Goal: {self.engine.config.get('word_goal', 50000)}", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
+        self.goal_lbl = tk.Label(self.footer, text=f"เป้าหมาย: {self.engine.config.get('word_goal', 50000)}", bg="#0a0a0a", fg="#666", font=("Segoe UI", 10))
         self.goal_lbl.pack(side=tk.LEFT)
         
         self.text.bind("<KeyRelease>", self.update_stats)
@@ -62,7 +62,7 @@ class StoryEditor(tk.Frame):
     def update_stats(self, evt=None):
         content = self.text.get("1.0", tk.END).strip()
         words = len(content.split())
-        self.stats.config(text=f"Words: {words}")
+        self.stats.config(text=f"จำนวนคำ: {words}")
         
         # Progress color
         goal = self.engine.config.get('word_goal', 50000)

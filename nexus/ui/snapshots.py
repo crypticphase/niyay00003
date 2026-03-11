@@ -12,7 +12,7 @@ class SnapshotManager(tk.Frame):
     def setup_ui(self):
         header = tk.Frame(self, bg="#0a0a0a")
         header.pack(fill=tk.X, padx=40, pady=30)
-        tk.Label(header, text="📸 SNAPSHOTS", font=("Segoe UI", 28, "bold"), bg="#0a0a0a", fg="white").pack(side=tk.LEFT)
+        tk.Label(header, text="📸 จุดบันทึก (Snapshots)", font=("Segoe UI", 28, "bold"), bg="#0a0a0a", fg="white").pack(side=tk.LEFT)
         
         main_frame = tk.Frame(self, bg="#0a0a0a")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=40)
@@ -25,17 +25,25 @@ class SnapshotManager(tk.Frame):
         ctrl_frame = tk.Frame(main_frame, bg="#0a0a0a", padx=20)
         ctrl_frame.pack(side=tk.LEFT, fill=tk.Y)
         
-        tk.Button(ctrl_frame, text="CAPTURE SNAPSHOT", command=self.capture, bg="#007acc", fg="white", width=20, pady=10).pack(pady=5)
-        tk.Button(ctrl_frame, text="RESTORE SELECTED", command=self.restore, bg="#cc0000", fg="white", width=20, pady=10).pack(pady=5)
+        tk.Button(ctrl_frame, text="บันทึกจุดนี้", command=self.capture, bg="#007acc", fg="white", width=20, pady=10).pack(pady=5)
+        tk.Button(ctrl_frame, text="ย้อนคืนจุดที่เลือก", command=self.restore, bg="#cc0000", fg="white", width=20, pady=10).pack(pady=5)
 
     def refresh_list(self):
         self.lb.delete(0, tk.END)
-        snap_dir = os.path.join(self.engine.get_dir(), "snapshots")
+        project_dir = self.engine.get_dir()
+        if not project_dir:
+            self.lb.insert(tk.END, "กรุณาโหลดโปรเจกต์ก่อนใช้งาน")
+            return
+
+        snap_dir = os.path.join(project_dir, "snapshots")
         if os.path.exists(snap_dir):
             for s in sorted(os.listdir(snap_dir), reverse=True):
                 self.lb.insert(tk.END, s)
 
     def capture(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load a project first.")
+            return
         label = "Manual Snapshot"
         self.engine.create_snapshot(label)
         messagebox.showinfo("Nexus", "Snapshot captured successfully.")
