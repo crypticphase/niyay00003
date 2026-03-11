@@ -1,24 +1,31 @@
-# NEXUS GOD WRITER - Modular Version
+# NEXUS GOD WRITER - The Ultimate Desktop Edition
 
-โปรเจกต์นี้ถูกปรับโครงสร้างใหม่ให้เป็นระบบ Modular เพื่อความเป็นมืออาชีพและรองรับการขยายตัวในอนาคต
+ซอฟต์แวร์ช่วยเขียนนิยายและสร้างโลก (Worldbuilding) ระดับมืออาชีพ ในรูปแบบ Desktop Application
 
-## โครงสร้างไฟล์ (File Structure)
+## 🚀 วิธีการติดตั้งและเริ่มใช้งาน (สำหรับ Windows)
 
-- `main.py`: จุดเริ่มต้นของโปรแกรม
-- `nexus/`: แพ็คเกจหลัก
-    - `engine/`: ส่วนประมวลผล (Project Management, AI Connector)
-    - `ui/`: ส่วนติดต่อผู้ใช้ (Main Window, Editor, Module Manager, AI Panel, Wiki)
-- `projects/`: โฟลเดอร์เก็บข้อมูลนิยาย
+1.  **ติดตั้งอัตโนมัติ**: ดับเบิลคลิกที่ไฟล์ `setup.bat` 
+    *   มันจะติดตั้ง Library ทั้งหมดที่จำเป็น (รวมถึง `google-generativeai`)
+    *   มันจะสร้างไฟล์ `.env` ให้คุณโดยอัตโนมัติ
+2.  **ตั้งค่า AI**: เปิดไฟล์ `.env` ด้วย Notepad แล้วใส่ Gemini API Key ของคุณ
+    ```env
+    GEMINI_API_KEY=ใส่_API_KEY_ที่นี่
+    ```
+3.  **เริ่มโปรแกรม**: รันไฟล์ `main.py` ด้วยคำสั่ง:
+    ```bash
+    python main.py
+    ```
 
-## วิธีการรัน (How to Run)
+## 🛠️ ฟีเจอร์หลัก
+- **Dynamic Schema**: กำหนดฟิลด์ข้อมูลเองได้ในทุกโมดูล
+- **AI God Assistant**: ผู้ช่วย AI ที่เข้าใจบริบทโลกของคุณอย่างลึกซึ้ง
+- **Relationship System**: เชื่อมโยงตัวละคร ไอเทม และสถานที่เข้าด้วยกัน
+- **Plot & Timeline**: วางแผนโครงเรื่องและประวัติศาสตร์โลกที่ซับซ้อน
+- **Focus Mode**: โหมดเขียนนิยายแบบไร้สิ่งรบกวน
+- **Export Suite**: ส่งออกผลงานเป็น Markdown หรือ PDF
 
-1. ติดตั้งไลบรารี: `pip install -r requirements.txt`
-2. ตั้งค่า API Key ในไฟล์ `.env`
-3. รันโปรแกรม: `python main.py`
-
-## ฟีเจอร์ที่อัปเกรด
-- **Modular Architecture**: แยกส่วนการทำงานชัดเจน
-- **Advanced AI Context**: ระบบ AI ที่ฉลาดขึ้นและเข้าใจบริบทโลกได้ดีขึ้น
-- **Rich Text Editor**: ระบบเขียนนิยายพร้อมสถิติและ Auto-save
-- **Lore Wiki**: ระบบค้นหาข้อมูลโลกแบบรวมศูนย์
-- **Consistency Checker**: ระบบ AI ตรวจสอบความสมเหตุสมผลของเนื้อเรื่อง
+## 📂 โครงสร้างโปรเจกต์
+- `main.py`: ไฟล์รันโปรแกรมหลัก
+- `setup.bat`: ไฟล์ติดตั้งอัตโนมัติ
+- `nexus/`: โค้ดส่วนประมวลผลและ UI
+- `projects/`: โฟลเดอร์เก็บข้อมูลนิยายของคุณ (JSON)

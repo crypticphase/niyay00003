@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 
 class ModuleManager(tk.Frame):
-    """The Ultimate Dynamic Module Manager with Custom Schema and AI Generation."""
+    """The Ultimate Dynamic Module Manager with Custom Schema, Tags, and Relationships."""
     def __init__(self, parent, engine, ai, mod_name):
         super().__init__(parent, bg="#0a0a0a")
         self.engine = engine
@@ -26,19 +26,25 @@ class ModuleManager(tk.Frame):
         list_frame = tk.Frame(self, bg="#0a0a0a")
         list_frame.pack(fill=tk.BOTH, expand=True, padx=40)
         
-        self.lb = tk.Listbox(list_frame, width=35, height=25, bg="#111", fg="#ccc", font=("Segoe UI", 11), borderwidth=0)
+        # Left Listbox
+        self.lb = tk.Listbox(list_frame, width=35, height=25, bg="#111", fg="#ccc", font=("Segoe UI", 11), borderwidth=0, selectbackground="#007acc")
         self.lb.pack(side=tk.LEFT, fill=tk.Y)
         
         for item in self.data: self.lb.insert(tk.END, item.get("name", "Unnamed"))
         
-        self.edit_frame = tk.Frame(list_frame, bg="#0a0a0a", padx=30)
-        self.edit_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        # Right Editor
+        self.edit_scroll = tk.Canvas(list_frame, bg="#0a0a0a", highlightthickness=0)
+        self.edit_scroll.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=30)
+        
+        self.edit_frame = tk.Frame(self.edit_scroll, bg="#0a0a0a")
+        self.edit_scroll.create_window((0,0), window=self.edit_frame, anchor="nw")
         
         self.fields_widgets = {}
         self.render_fields()
         
         self.lb.bind('<<ListboxSelect>>', self.on_select)
         
+        # Action Buttons
         btn_row = tk.Frame(self.edit_frame, bg="#0a0a0a")
         btn_row.pack(pady=30, anchor="w")
         tk.Button(btn_row, text="UPDATE", command=self.save_item, bg="#007acc", fg="white", width=15, pady=8).pack(side=tk.LEFT, padx=5)
@@ -50,23 +56,35 @@ class ModuleManager(tk.Frame):
             if not isinstance(widget, tk.Frame): widget.destroy()
             
         self.fields_widgets = {}
+        
+        # Dynamic Fields from Schema
         for field in self.schema:
             tk.Label(self.edit_frame, text=field.upper(), bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(10,0))
-            if field == "details" or field == "backstory" or field == "description":
-                txt = tk.Text(self.edit_frame, width=70, height=10, bg="#111", fg="white", font=("Segoe UI", 11), borderwidth=0)
+            if field in ["details", "backstory", "description", "personality", "abilities"]:
+                txt = tk.Text(self.edit_frame, width=70, height=8, bg="#111", fg="white", font=("Segoe UI", 11), borderwidth=0, insertbackground="white")
                 txt.pack(pady=5, anchor="w")
                 self.fields_widgets[field] = txt
             else:
-                ent = tk.Entry(self.edit_frame, width=50, font=("Segoe UI", 12), bg="#111", fg="white", borderwidth=0)
+                ent = tk.Entry(self.edit_frame, width=50, font=("Segoe UI", 12), bg="#111", fg="white", borderwidth=0, insertbackground="white")
                 ent.pack(pady=5, anchor="w")
                 self.fields_widgets[field] = ent
+
+        # Standard Fields: Tags & Relationships
+        tk.Label(self.edit_frame, text="TAGS (comma separated)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(15,0))
+        self.tags_ent = tk.Entry(self.edit_frame, width=50, font=("Segoe UI", 12), bg="#111", fg="#ccc", borderwidth=0)
+        self.tags_ent.pack(pady=5, anchor="w")
+        
+        tk.Label(self.edit_frame, text="RELATIONSHIPS (linked entries)", bg="#0a0a0a", fg="#444", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(15,0))
+        self.rel_ent = tk.Entry(self.edit_frame, width=50, font=("Segoe UI", 12), bg="#111", fg="#ccc", borderwidth=0)
+        self.rel_ent.pack(pady=5, anchor="w")
 
     def edit_schema(self):
         win = tk.Toplevel(self)
         win.title(f"Schema Editor: {self.mod_name}")
         win.geometry("400x400")
+        win.configure(bg="#1a1a1a", padx=20, pady=20)
         
-        tk.Label(win, text="Fields (comma separated):").pack(pady=10)
+        tk.Label(win, text="Fields (comma separated):", bg="#1a1a1a", fg="white").pack(pady=10)
         ent = tk.Entry(win, width=50)
         ent.insert(0, ", ".join(self.schema))
         ent.pack(pady=10)
@@ -79,16 +97,17 @@ class ModuleManager(tk.Frame):
             self.engine.save()
             win.destroy()
             
-        tk.Button(win, text="Save Schema", command=save).pack(pady=20)
+        tk.Button(win, text="Save Schema", command=save, bg="#007acc", fg="white").pack(pady=20)
 
     def ai_gen(self):
         ctx = f"World: {self.engine.world['world_name']}\nGenre: {self.engine.config['genre']}\nLore: {self.engine.world['history_summary']}"
         res = self.ai.generate_lore(self.mod_name, self.schema, ctx)
         
-        # Simple parsing for AI response
         new_item = {f: "" for f in self.schema}
-        new_item["name"] = "AI Generated"
+        new_item["name"] = f"AI {self.mod_name.capitalize()}"
         new_item["details"] = res
+        new_item["tags"] = ""
+        new_item["relations"] = ""
         
         self.data.append(new_item)
         self.lb.insert(tk.END, new_item["name"])
@@ -107,6 +126,11 @@ class ModuleManager(tk.Frame):
                 else:
                     widget.delete(0, tk.END)
                     widget.insert(0, item.get(field, ""))
+            
+            self.tags_ent.delete(0, tk.END)
+            self.tags_ent.insert(0, item.get("tags", ""))
+            self.rel_ent.delete(0, tk.END)
+            self.rel_ent.insert(0, item.get("relations", ""))
 
     def save_item(self):
         if self.lb.curselection():
@@ -117,6 +141,9 @@ class ModuleManager(tk.Frame):
                 else:
                     self.data[idx][field] = widget.get()
             
+            self.data[idx]["tags"] = self.tags_ent.get()
+            self.data[idx]["relations"] = self.rel_ent.get()
+            
             self.lb.delete(idx)
             self.lb.insert(idx, self.data[idx].get("name", "Unnamed"))
             self.engine.save()
@@ -125,6 +152,8 @@ class ModuleManager(tk.Frame):
     def add_new(self):
         new_item = {f: "" for f in self.schema}
         new_item["name"] = "New Entry"
+        new_item["tags"] = ""
+        new_item["relations"] = ""
         self.data.append(new_item)
         self.lb.insert(tk.END, "New Entry")
 
