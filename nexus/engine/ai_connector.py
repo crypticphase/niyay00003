@@ -36,7 +36,7 @@ class AIConnector:
 
         try:
             response = requests.post(self.api_url, headers=headers, data=json.dumps(payload))
-            if response.status_status == 200:
+            if response.status_code == 200:
                 result = response.json()
                 return result["choices"][0]["message"]["content"]
             else:

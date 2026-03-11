@@ -4,11 +4,11 @@ import subprocess
 
 def install_dependencies():
     """Check and install missing dependencies automatically."""
-    required = ["google-generativeai", "python-dotenv", "fpdf2", "pillow", "requests"]
+    required = ["google-genai", "python-dotenv", "fpdf2", "pillow", "requests"]
     for lib in required:
         try:
-            if lib == "google-generativeai":
-                import google.generativeai
+            if lib == "google-genai":
+                import google.genai
             elif lib == "python-dotenv":
                 import dotenv
             elif lib == "fpdf2":
@@ -36,8 +36,5 @@ if __name__ == "__main__":
         os.makedirs("projects")
         
     # Start the Ultimate Nexus God Writer
-    try:
-        app = MainWindow()
-        app.mainloop()
-    except Exception as e:
-        print(f"Critical Error: {e}")
+    app = MainWindow()
+    app.mainloop()

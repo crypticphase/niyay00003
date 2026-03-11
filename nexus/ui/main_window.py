@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, scrolledtext
+from datetime import datetime
 from nexus.engine.project_manager import ProjectManager
 from nexus.engine.ai_connector import AIConnector
 from nexus.ui.editor import StoryEditor
@@ -129,6 +130,7 @@ class MainWindow(tk.Tk):
         # Sidebar
         self.sidebar = tk.Frame(self, width=250, bg="#111", padx=10, pady=10)
         self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
+        self.sidebar.pack_propagate(False)
         
         tk.Label(self.sidebar, text="NEXUS", font=("Impact", 28), bg="#111", fg="#00ff00").pack(pady=20)
         
@@ -138,9 +140,37 @@ class MainWindow(tk.Tk):
         self.nav_frame = tk.Frame(self.sidebar, bg="#111")
         self.nav_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Main Content
-        self.content = tk.Frame(self, bg="#0a0a0a")
-        self.content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        # Content Area with Breadcrumb
+        self.main_container = tk.Frame(self, bg="#0a0a0a")
+        self.main_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.breadcrumb_bar = tk.Frame(self.main_container, bg="#0f0f0f", height=40)
+        self.breadcrumb_bar.pack(fill=tk.X)
+        self.breadcrumb_bar.pack_propagate(False)
+        
+        self.content = tk.Frame(self.main_container, bg="#0a0a0a")
+        self.content.pack(fill=tk.BOTH, expand=True)
+
+    def update_breadcrumb(self, path_list):
+        for w in self.breadcrumb_bar.winfo_children(): w.destroy()
+        
+        tk.Label(self.breadcrumb_bar, text="📍", bg="#0f0f0f", fg="#444").pack(side=tk.LEFT, padx=(10, 5))
+        
+        for i, item in enumerate(path_list):
+            name, cmd = item
+            btn = tk.Button(self.breadcrumb_bar, text=name, command=cmd, bg="#0f0f0f", fg="#888", 
+                            relief=tk.FLAT, font=("Segoe UI", 9), activebackground="#1a1a1a", activeforeground="white")
+            btn.pack(side=tk.LEFT)
+            if i < len(path_list) - 1:
+                tk.Label(self.breadcrumb_bar, text=">", bg="#0f0f0f", fg="#333").pack(side=tk.LEFT)
+
+    def add_to_recent(self, name, cmd_type, data=None):
+        entry = {"name": name, "type": cmd_type, "data": data}
+        # Remove duplicate
+        self.engine.recently_viewed = [r for r in self.engine.recently_viewed if r["name"] != name]
+        self.engine.recently_viewed.insert(0, entry)
+        self.engine.recently_viewed = self.engine.recently_viewed[:15] # Keep 15
+        self.engine.save()
 
     def update_sidebar(self):
         for widget in self.nav_frame.winfo_children():
@@ -321,8 +351,13 @@ class MainWindow(tk.Tk):
         tk.Button(win, text="OPEN PROJECT", command=load, bg="#007acc", fg="white", pady=10).pack(fill=tk.X)
 
     def show_world_config(self):
+        if not self.engine.current_id:
+            messagebox.showwarning("Nexus", "Please load or create a project first.")
+            self.show_welcome()
+            return
         self.clear_content()
-        self.update_sidebar()
+        self.update_breadcrumb([("Home", self.show_welcome), ("World Config", self.show_world_config)])
+        self.add_to_recent("World Config", "nav")
         tk.Label(self.content, text="🌍 ตั้งค่าโลก (World Wizard)", font=("Segoe UI", 28, "bold"), bg="#0a0a0a", fg="white").pack(anchor="w", padx=40, pady=30)
         
         form = tk.Frame(self.content, bg="#0a0a0a")
@@ -352,6 +387,8 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("Editor", self.show_editor)])
+        self.add_to_recent("Editor", "nav")
         StoryEditor(self.content, self.engine, self.ai).pack(fill=tk.BOTH, expand=True)
 
     def show_module_manager(self, mod_name):
@@ -360,6 +397,8 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), (mod_name.capitalize(), lambda: self.show_module_manager(mod_name))])
+        self.add_to_recent(f"Module: {mod_name}", "module", mod_name)
         ModuleManager(self.content, self.engine, self.ai, mod_name).pack(fill=tk.BOTH, expand=True)
 
     def show_ai_panel(self):
@@ -368,6 +407,8 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("AI Panel", self.show_ai_panel)])
+        self.add_to_recent("AI Panel", "nav")
         AIPanel(self.content, self.engine, self.ai).pack(fill=tk.BOTH, expand=True)
 
     def show_lore_wiki(self):
@@ -376,6 +417,8 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("Wiki", self.show_lore_wiki)])
+        self.add_to_recent("Lore Wiki", "nav")
         LoreWiki(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_plot_planner(self):
@@ -384,6 +427,8 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("Plot", self.show_plot_planner)])
+        self.add_to_recent("Plot Planner", "nav")
         PlotPlanner(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_timeline(self):
@@ -392,6 +437,8 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("Timeline", self.show_timeline)])
+        self.add_to_recent("Timeline", "nav")
         TimelineView(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_calendar(self):
@@ -400,6 +447,8 @@ class MainWindow(tk.Tk):
             self.show_welcome()
             return
         self.clear_content()
+        self.update_breadcrumb([("Home", self.show_welcome), ("Calendar", self.show_calendar)])
+        self.add_to_recent("Calendar", "nav")
         CalendarView(self.content, self.engine).pack(fill=tk.BOTH, expand=True)
 
     def show_snapshots(self):

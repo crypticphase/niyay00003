@@ -4,7 +4,7 @@ echo   NEXUS GOD WRITER - AUTO SETUP
 echo ==========================================
 echo.
 echo [1/2] Installing Python Dependencies...
-pip install google-generativeai python-dotenv pillow markdown fpdf2
+pip install google-genai python-dotenv pillow markdown fpdf2
 echo.
 echo [2/2] Checking for .env file...
 if not exist .env (
