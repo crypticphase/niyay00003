@@ -1,11 +1,24 @@
-<div align="center">
+# NEXUS GOD WRITER - Modular Version
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+โปรเจกต์นี้ถูกปรับโครงสร้างใหม่ให้เป็นระบบ Modular เพื่อความเป็นมืออาชีพและรองรับการขยายตัวในอนาคต
 
-  <h1>Built with AI Studio</h2>
+## โครงสร้างไฟล์ (File Structure)
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- `main.py`: จุดเริ่มต้นของโปรแกรม
+- `nexus/`: แพ็คเกจหลัก
+    - `engine/`: ส่วนประมวลผล (Project Management, AI Connector)
+    - `ui/`: ส่วนติดต่อผู้ใช้ (Main Window, Editor, Module Manager, AI Panel, Wiki)
+- `projects/`: โฟลเดอร์เก็บข้อมูลนิยาย
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## วิธีการรัน (How to Run)
 
-</div>
+1. ติดตั้งไลบรารี: `pip install -r requirements.txt`
+2. ตั้งค่า API Key ในไฟล์ `.env`
+3. รันโปรแกรม: `python main.py`
+
+## ฟีเจอร์ที่อัปเกรด
+- **Modular Architecture**: แยกส่วนการทำงานชัดเจน
+- **Advanced AI Context**: ระบบ AI ที่ฉลาดขึ้นและเข้าใจบริบทโลกได้ดีขึ้น
+- **Rich Text Editor**: ระบบเขียนนิยายพร้อมสถิติและ Auto-save
+- **Lore Wiki**: ระบบค้นหาข้อมูลโลกแบบรวมศูนย์
+- **Consistency Checker**: ระบบ AI ตรวจสอบความสมเหตุสมผลของเนื้อเรื่อง
