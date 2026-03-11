@@ -1,6 +1,29 @@
+import os
+import sys
+import subprocess
+
+def install_dependencies():
+    """Check and install missing dependencies automatically."""
+    required = ["google-generativeai", "python-dotenv", "fpdf2", "pillow"]
+    for lib in required:
+        try:
+            if lib == "google-generativeai":
+                import google.generativeai
+            elif lib == "python-dotenv":
+                import dotenv
+            elif lib == "fpdf2":
+                import fpdf
+            elif lib == "pillow":
+                import PIL
+        except ImportError:
+            print(f"[*] Missing {lib}. Installing...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", lib])
+
+# Run installer before importing nexus modules
+install_dependencies()
+
 from nexus.ui.main_window import MainWindow
 from dotenv import load_dotenv
-import os
 
 # Load environment variables
 load_dotenv()
